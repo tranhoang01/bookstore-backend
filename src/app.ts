@@ -24,10 +24,18 @@ const app = express();
 
 app.use(
   helmet({
-    contentSecurityPolicy: false, // ✅ Swagger UI dùng inline scripts
-    crossOriginEmbedderPolicy: false, // ✅ đôi khi chặn swagger-ui assets
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false,
+
+    // ✅ quan trọng: tắt HSTS để browser không ép HTTPS
+    hsts: false,
+
+    // (tuỳ chọn) giảm cảnh báo COOP/OAC
+    crossOriginOpenerPolicy: false,
+    originAgentCluster: false,
   })
 );
+
 
 app.use(cors());
 app.use(morgan("dev"));
