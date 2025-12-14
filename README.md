@@ -36,7 +36,7 @@ The server provides:
 All sensitive values are managed via `.env` file.  
 ⚠️ **`.env` is NOT included in this public repository.**
 
-### `.env.example`
+`.env.example`
 
 ```env
 PORT=10156
@@ -52,6 +52,7 @@ JWT_REFRESH_EXPIRES_IN=7d
 
 CORS_ORIGIN=*
 
+```
 ## 4. How to Run Locally
 # install dependencies
 npm install
