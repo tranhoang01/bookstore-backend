@@ -31,37 +31,7 @@ The server provides:
 
 ---
 
-## 3. Project Structure
-
-repo-root
-├─ src/
-│ ├─ modules/
-│ │ ├─ auth/
-│ │ ├─ users/
-│ │ ├─ books/
-│ │ ├─ reviews/
-│ │ ├─ comments/
-│ │ ├─ wishlist/
-│ │ ├─ cart/
-│ │ ├─ orders/
-│ │ └─ stats/
-│ ├─ middlewares/
-│ ├─ docs/ # swagger configuration
-│ └─ server.ts
-├─ prisma/
-│ ├─ schema.prisma
-│ └─ seed.ts
-├─ postman/
-│ └─ bookstore.postman_collection.json
-├─ .env.example
-├─ .gitignore
-├─ package.json
-└─ README.md
-
-
----
-
-## 4. Environment Variables
+## 3. Environment Variables
 
 All sensitive values are managed via `.env` file.  
 ⚠️ **`.env` is NOT included in this public repository.**
@@ -82,7 +52,7 @@ JWT_REFRESH_EXPIRES_IN=7d
 
 CORS_ORIGIN=*
 
-5. How to Run Locally
+## 4. How to Run Locally
 # install dependencies
 npm install
 
@@ -98,7 +68,7 @@ npx prisma db seed
 # run development server
 npm run dev
 
-6. Deployment (JCloud)
+## 5. Deployment (JCloud)
 
 Base URL
 http://113.198.66.68:10156
@@ -112,7 +82,7 @@ http://113.198.66.68:10156/health
 Process Manager
 PM2 is used to keep the server running after reboot.
 
-7. API Documentation (Swagger)
+## 6. API Documentation (Swagger)
 
 Swagger UI provides:
 
@@ -126,7 +96,7 @@ Access URL:
 
 GET /docs
 
-8. Authentication & Authorization
+## 7. Authentication & Authorization
 Authentication
 
 JWT-based authentication
@@ -147,13 +117,14 @@ User deactivation
 
 Statistics APIs
 
-9. Example Test Accounts
+## 8. Example Test Accounts
 Role	Email	Password
 USER	user1@example.com
 	P@ssw0rd!
 ADMIN	admin@example.com
 	P@ssw0rd!
-10. Major API Endpoints Summary
+
+## 9. Major API Endpoints Summary
 Auth
 
 POST /auth/signup
@@ -230,7 +201,7 @@ GET /stats/top-books
 
 GET /stats/daily
 
-11. Postman Collection
+## 10. Postman Collection
 
 Postman collection JSON is provided in:
 
@@ -249,7 +220,7 @@ Error case testing
 
 Collection Runner supported
 
-12. Error Handling
+## 11. Error Handling
 
 All API errors follow a unified format:
 
@@ -262,7 +233,7 @@ All API errors follow a unified format:
   "details": null
 }
 
-13. Health Check
+## 12. Health Check
 GET /health
 
 
@@ -277,7 +248,7 @@ Response:
   }
 }
 
-14. Security Considerations
+## 13. Security Considerations
 
 Password hashing using bcrypt
 
@@ -289,7 +260,7 @@ CORS configured explicitly
 
 Soft delete applied to critical resources
 
-15. Limitations & Future Improvements
+## 14. Limitations & Future Improvements
 
 Payment gateway integration
 
