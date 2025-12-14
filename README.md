@@ -54,19 +54,24 @@ CORS_ORIGIN=*
 
 ```
 ## 4. How to Run Locally
-* install dependencies
+#install dependencies:
+
 npm install
 
-#prisma generate: 
+#prisma generate:
+
 npx prisma generate
 
-#migrate database: 
+#migrate database:
+
 npx prisma migrate dev
 
-#seed data (200+ records): 
+#seed data (200+ records):
+
 npx prisma db seed
 
-#run development server: 
+#run development server:
+
 npm run dev
 
 ## 5. Deployment (JCloud)
