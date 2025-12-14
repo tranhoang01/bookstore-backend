@@ -1,0 +1,342 @@
+// prisma/schema.prisma
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ENUMS
+// --------------------------------------------------
+
+enum UserRole {
+  CUSTOMER
+  ADMIN
+}
+
+enum BookFormat {
+  PAPERBACK
+  HARDCOVER
+  EBOOK
+  AUDIOBOOK
+}
+
+enum CartStatus {
+  ACTIVE
+  CHECKED_OUT
+  ABANDONED
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  SHIPPED
+  COMPLETED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentStatus {
+  UNPAID
+  PAID
+  REFUNDED
+  FAILED
+}
+
+// USER & AUTH
+// --------------------------------------------------
+
+model User {
+  id           Int       @id @default(autoincrement())
+  email        String    @unique
+  passwordHash String
+  name         String
+  phone        String?
+  role         UserRole  @default(CUSTOMER)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+
+  reviews       Review[]
+  comments      Comment[]
+  reviewLikes   ReviewLike[]
+  commentLikes  CommentLike[]
+  wishlistItems WishlistItem[]
+  libraryItems  LibraryItem[]
+  carts         Cart[]
+  orders        Order[]
+  refreshTokens RefreshToken[]
+
+  @@index([role])
+}
+
+model RefreshToken {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  tokenHash String   @unique
+  userAgent String?
+  ipAddress String?
+  revoked   Boolean  @default(false)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// AUTHORS & CATEGORIES
+// --------------------------------------------------
+
+model Author {
+  id        Int      @id @default(autoincrement())
+  name      String
+  bio       String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  bookAuthors BookAuthor[]
+}
+
+model Category {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  slug      String   @unique
+  parentId  Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  parent   Category?  @relation("CategoryToParent", fields: [parentId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  children Category[] @relation("CategoryToParent")
+
+  bookCategories BookCategory[]
+}
+
+// BOOKS
+// --------------------------------------------------
+
+model Book {
+  id              Int        @id @default(autoincrement())
+  title           String
+  isbn13          String?    @unique
+  description     String?
+  price           Decimal    @default(0)
+  currency        String     @default("KRW")
+  stock           Int        @default(0)
+  publicationDate DateTime?
+  coverUrl        String?
+  format          BookFormat @default(PAPERBACK)
+  language        String?
+  publisher       String?
+  avgRating       Decimal    @default(0)
+  reviewCount     Int        @default(0)
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  deletedAt       DateTime?
+
+  bookAuthors    BookAuthor[]
+  bookCategories BookCategory[]
+  reviews        Review[]
+  wishlistItems  WishlistItem[]
+  libraryItems   LibraryItem[]
+  cartItems      CartItem[]
+  orderItems     OrderItem[]
+
+  @@index([title])
+  @@index([avgRating])
+}
+
+model BookAuthor {
+  bookId      Int
+  authorId    Int
+  authorOrder Int      @default(1)
+  createdAt   DateTime @default(now())
+
+  book   Book   @relation(fields: [bookId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  author Author @relation(fields: [authorId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@id([bookId, authorId])
+  @@index([authorId])
+}
+
+model BookCategory {
+  bookId     Int
+  categoryId Int
+  createdAt  DateTime @default(now())
+
+  book     Book     @relation(fields: [bookId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@id([bookId, categoryId])
+  @@index([categoryId])
+}
+
+// REVIEWS & COMMENTS
+// --------------------------------------------------
+
+model Review {
+  id           Int       @id @default(autoincrement())
+  userId       Int
+  bookId       Int
+  title        String?
+  content      String
+  rating       Int
+  likeCount    Int       @default(0)
+  commentCount Int       @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+
+  user     User         @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  book     Book         @relation(fields: [bookId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  likes    ReviewLike[]
+  comments Comment[]
+
+  @@unique([userId, bookId])
+  @@index([bookId])
+  @@index([userId])
+  @@index([rating])
+}
+
+model ReviewLike {
+  userId    Int
+  reviewId  Int
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@id([userId, reviewId])
+  @@index([reviewId])
+}
+
+model Comment {
+  id        Int       @id @default(autoincrement())
+  reviewId  Int
+  userId    Int
+  parentId  Int?
+  content   String
+  likeCount Int       @default(0)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  review   Review        @relation(fields: [reviewId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user     User          @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  parent   Comment?      @relation("CommentToParent", fields: [parentId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  children Comment[]     @relation("CommentToParent")
+  likes    CommentLike[]
+
+  @@index([reviewId])
+  @@index([userId])
+  @@index([parentId])
+}
+
+model CommentLike {
+  userId    Int
+  commentId Int
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  comment Comment @relation(fields: [commentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@id([userId, commentId])
+  @@index([commentId])
+}
+
+// WISHLIST & LIBRARY
+// --------------------------------------------------
+
+model WishlistItem {
+  userId    Int
+  bookId    Int
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  book Book @relation(fields: [bookId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@id([userId, bookId])
+  @@index([bookId])
+}
+
+model LibraryItem {
+  userId     Int
+  bookId     Int
+  acquiredAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  book Book @relation(fields: [bookId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@id([userId, bookId])
+  @@index([bookId])
+}
+
+// CART & ORDERS
+// --------------------------------------------------
+
+model Cart {
+  id        Int        @id @default(autoincrement())
+  userId    Int
+  status    CartStatus @default(ACTIVE)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  items CartItem[]
+  order Order?     @relation("CartToOrder")
+
+  @@index([userId])
+  @@index([status])
+}
+
+model CartItem {
+  cartId    Int
+  bookId    Int
+  quantity  Int      @default(1)
+  unitPrice Decimal
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  cart Cart @relation(fields: [cartId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  book Book @relation(fields: [bookId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@id([cartId, bookId])
+  @@index([bookId])
+}
+
+model Order {
+  id            Int           @id @default(autoincrement())
+  userId        Int
+  cartId        Int?          @unique
+  status        OrderStatus   @default(PENDING)
+  paymentStatus PaymentStatus @default(UNPAID)
+  totalAmount   Decimal       @default(0)
+  placedAt      DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  user  User        @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  cart  Cart?       @relation("CartToOrder", fields: [cartId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  items OrderItem[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([paymentStatus])
+}
+
+model OrderItem {
+  orderId           Int
+  bookId            Int
+  quantity          Int     @default(1)
+  unitPrice         Decimal
+  bookTitleSnapshot String
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  book  Book  @relation(fields: [bookId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@id([orderId, bookId])
+  @@index([bookId])
+}
