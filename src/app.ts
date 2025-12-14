@@ -22,7 +22,13 @@ import { swaggerSpec } from "./docs/swagger";
 
 const app = express();
 
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: false, // ✅ Swagger UI dùng inline scripts
+    crossOriginEmbedderPolicy: false, // ✅ đôi khi chặn swagger-ui assets
+  })
+);
+
 app.use(cors());
 app.use(morgan("dev"));
 app.use(express.json());
