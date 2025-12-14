@@ -82,6 +82,8 @@ http://113.198.66.68:10156
 Swagger UI
 http://113.198.66.68:10156/docs
 
+http://113.198.66.68:10156/docs/json
+
 Health Check
 http://113.198.66.68:10156/health
 
